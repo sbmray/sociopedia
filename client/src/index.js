@@ -18,8 +18,13 @@ import {
 import storage from "redux-persist/lib/storage";
 import { PersistGate } from "redux-persist/integration/react";
 
+// ✅ Persist Configuration
 const persistConfig = { key: "root", storage, version: 1 };
+
+// ✅ Combine persist reducer
 const persistedReducer = persistReducer(persistConfig, authReducer);
+
+// ✅ Create store
 const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -30,13 +35,14 @@ const store = configureStore({
     }),
 });
 
+// ✅ Create persistor ONCE
+const persistor = persistStore(store);
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistStore(store)}>
-        <App />
-      </PersistGate>
-    </Provider>
-  </React.StrictMode>
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <App />
+    </PersistGate>
+  </Provider>
 );

@@ -23,7 +23,7 @@ const registerSchema = yup.object().shape({
   password: yup.string().required("required"),
   location: yup.string().required("required"),
   occupation: yup.string().required("required"),
-  picture: yup.string().required("required"),
+  picture: yup.mixed().required("required"),
 });
 
 const loginSchema = yup.object().shape({
@@ -55,48 +55,64 @@ const Form = () => {
   const isLogin = pageType === "login";
   const isRegister = pageType === "register";
 
+  // REGISTER FUNCTION
   const register = async (values, onSubmitProps) => {
-    // this allows us to send form info with image
-    const formData = new FormData();
-    for (let value in values) {
-      formData.append(value, values[value]);
-    }
-    formData.append("picturePath", values.picture.name);
+    try {
+      const formData = new FormData();
+      for (let value in values) {
+        formData.append(value, values[value]);
+      }
+      formData.append("picturePath", values.picture.name);
 
-    const savedUserResponse = await fetch(
-      "http://localhost:3001/auth/register",
-      {
+      const response = await fetch("http://localhost:3001/auth/register", {
         method: "POST",
         body: formData,
+      });
+
+      if (!response.ok) {
+        alert("Registration failed. Please try again.");
+        return;
       }
-    );
-    const savedUser = await savedUserResponse.json();
-    onSubmitProps.resetForm();
 
-    if (savedUser) {
-      setPageType("login");
+      const savedUser = await response.json();
+      onSubmitProps.resetForm();
+
+      if (savedUser) {
+        alert("Registration successful! Please log in.");
+        setPageType("login");
+      }
+    } catch (err) {
+      console.error("Register error:", err);
     }
   };
 
+  // LOGIN FUNCTION
   const login = async (values, onSubmitProps) => {
-    const loggedInResponse = await fetch("http://localhost:3001/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-    const loggedIn = await loggedInResponse.json();
-    onSubmitProps.resetForm();
-    if (loggedIn) {
-      dispatch(
-        setLogin({
-          user: loggedIn.user,
-          token: loggedIn.token,
-        })
-      );
-      navigate("/home");
+    try {
+      const response = await fetch("http://localhost:3001/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        alert("Invalid email or password!");
+        return;
+      }
+
+      const loggedIn = await response.json();
+      onSubmitProps.resetForm();
+
+      if (loggedIn.user && loggedIn.token) {
+        dispatch(setLogin({ user: loggedIn.user, token: loggedIn.token }));
+        navigate("/home");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
     }
   };
 
+  // HANDLE SUBMIT
   const handleFormSubmit = async (values, onSubmitProps) => {
     if (isLogin) await login(values, onSubmitProps);
     if (isRegister) await register(values, onSubmitProps);
@@ -135,9 +151,7 @@ const Form = () => {
                   onChange={handleChange}
                   value={values.firstName}
                   name="firstName"
-                  error={
-                    Boolean(touched.firstName) && Boolean(errors.firstName)
-                  }
+                  error={Boolean(touched.firstName) && Boolean(errors.firstName)}
                   helperText={touched.firstName && errors.firstName}
                   sx={{ gridColumn: "span 2" }}
                 />
@@ -167,9 +181,7 @@ const Form = () => {
                   onChange={handleChange}
                   value={values.occupation}
                   name="occupation"
-                  error={
-                    Boolean(touched.occupation) && Boolean(errors.occupation)
-                  }
+                  error={Boolean(touched.occupation) && Boolean(errors.occupation)}
                   helperText={touched.occupation && errors.occupation}
                   sx={{ gridColumn: "span 4" }}
                 />
@@ -201,6 +213,17 @@ const Form = () => {
                             <Typography>{values.picture.name}</Typography>
                             <EditOutlinedIcon />
                           </FlexBetween>
+                        )}
+                        {values.picture && (
+                          <img
+                            src={URL.createObjectURL(values.picture)}
+                            alt="preview"
+                            style={{
+                              marginTop: "10px",
+                              maxHeight: "150px",
+                              borderRadius: "5px",
+                            }}
+                          />
                         )}
                       </Box>
                     )}

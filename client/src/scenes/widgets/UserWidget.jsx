@@ -22,30 +22,34 @@ const UserWidget = ({ userId, picturePath }) => {
   const main = palette.neutral.main;
 
   const getUser = async () => {
-    const response = await fetch(`http://localhost:3001/users/${userId}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await response.json();
-    setUser(data);
+    try {
+      const response = await fetch(`http://localhost:3001/users/${userId}`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      setUser(data);
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+    }
   };
 
   useEffect(() => {
-    getUser();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (userId) getUser();
+  }, [userId]); // ✅ added dependency
 
   if (!user) {
     return null;
   }
 
   const {
-    firstName,
-    lastName,
-    location,
-    occupation,
-    viewedProfile,
-    impressions,
-    friends,
+    firstName = "",
+    lastName = "",
+    location = "Not specified",
+    occupation = "Not specified",
+    viewedProfile = 0,
+    impressions = 0,
+    friends = [], // ✅ default empty array
   } = user;
 
   return (
@@ -72,7 +76,9 @@ const UserWidget = ({ userId, picturePath }) => {
             >
               {firstName} {lastName}
             </Typography>
-            <Typography color={medium}>{friends.length} friends</Typography>
+            <Typography color={medium}>
+              {Array.isArray(friends) ? friends.length : 0} friends
+            </Typography>
           </Box>
         </FlexBetween>
         <ManageAccountsOutlined />

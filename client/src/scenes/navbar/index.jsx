@@ -9,6 +9,7 @@ import {
   FormControl,
   useTheme,
   useMediaQuery,
+  Button,
 } from "@mui/material";
 import {
   Search,
@@ -39,15 +40,16 @@ const Navbar = () => {
   const primaryLight = theme.palette.primary.light;
   const alt = theme.palette.background.alt;
 
-  const fullName = `${user.firstName} ${user.lastName}`;
+  const fullName = user ? `${user.firstName} ${user.lastName}` : "Guest";
 
   return (
     <FlexBetween padding="1rem 6%" backgroundColor={alt}>
+      {/* Left Section */}
       <FlexBetween gap="1.75rem">
         <Typography
           fontWeight="bold"
           fontSize="clamp(1rem, 2rem, 2.25rem)"
-          color="primary"
+          color={theme.palette.primary.main}
           onClick={() => navigate("/home")}
           sx={{
             "&:hover": {
@@ -73,7 +75,7 @@ const Navbar = () => {
         )}
       </FlexBetween>
 
-      {/* DESKTOP NAV */}
+      {/* Desktop Navigation */}
       {isNonMobileScreens ? (
         <FlexBetween gap="2rem">
           <IconButton onClick={() => dispatch(setMode())}>
@@ -83,9 +85,19 @@ const Navbar = () => {
               <LightMode sx={{ color: dark, fontSize: "25px" }} />
             )}
           </IconButton>
-          <Message sx={{ fontSize: "25px" }} />
-          <Notifications sx={{ fontSize: "25px" }} />
-          <Help sx={{ fontSize: "25px" }} />
+          <Message sx={{ fontSize: "25px", cursor: "pointer" }} />
+          <Notifications sx={{ fontSize: "25px", cursor: "pointer" }} />
+          <Help sx={{ fontSize: "25px", cursor: "pointer" }} />
+
+          {/* Go Premium Button */}
+          <Button
+            onClick={() => navigate("/payment")}
+            variant="outlined"
+            color="secondary"
+          >
+            Go Premium
+          </Button>
+
           <FormControl variant="standard" value={fullName}>
             <Select
               value={fullName}
@@ -119,7 +131,7 @@ const Navbar = () => {
         </IconButton>
       )}
 
-      {/* MOBILE NAV */}
+      {/* Mobile Navigation Menu */}
       {!isNonMobileScreens && isMobileMenuToggled && (
         <Box
           position="fixed"
@@ -131,7 +143,7 @@ const Navbar = () => {
           minWidth="300px"
           backgroundColor={background}
         >
-          {/* CLOSE ICON */}
+          {/* Close Button */}
           <Box display="flex" justifyContent="flex-end" p="1rem">
             <IconButton
               onClick={() => setIsMobileMenuToggled(!isMobileMenuToggled)}
@@ -140,7 +152,7 @@ const Navbar = () => {
             </IconButton>
           </Box>
 
-          {/* MENU ITEMS */}
+          {/* Menu Items */}
           <FlexBetween
             display="flex"
             flexDirection="column"
@@ -148,19 +160,29 @@ const Navbar = () => {
             alignItems="center"
             gap="3rem"
           >
-            <IconButton
-              onClick={() => dispatch(setMode())}
-              sx={{ fontSize: "25px" }}
-            >
+            <IconButton onClick={() => dispatch(setMode())}>
               {theme.palette.mode === "dark" ? (
                 <DarkMode sx={{ fontSize: "25px" }} />
               ) : (
                 <LightMode sx={{ color: dark, fontSize: "25px" }} />
               )}
             </IconButton>
-            <Message sx={{ fontSize: "25px" }} />
-            <Notifications sx={{ fontSize: "25px" }} />
-            <Help sx={{ fontSize: "25px" }} />
+            <Message sx={{ fontSize: "25px", cursor: "pointer" }} />
+            <Notifications sx={{ fontSize: "25px", cursor: "pointer" }} />
+            <Help sx={{ fontSize: "25px", cursor: "pointer" }} />
+
+            {/* ✅ Go Premium Button (Mobile) */}
+            <Button
+              onClick={() => {
+                setIsMobileMenuToggled(false);
+                navigate("/payment");
+              }}
+              variant="outlined"
+              color="secondary"
+            >
+              Go Premium
+            </Button>
+
             <FormControl variant="standard" value={fullName}>
               <Select
                 value={fullName}
